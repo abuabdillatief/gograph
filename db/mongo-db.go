@@ -2,23 +2,25 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
 	"github.com/abuabdillatief/gqlgen-todos/graph/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/mgo.v2/bson"
 )
 
-//VideoDB ...
-type VideoDB interface {
-	Save(video *model.Video)
-	FindAll() []*model.Video
-}
+// //VideoDB ...
+// type VideoDB interface {
+// 	Save(video *model.NewVideo) *model.Video
+// 	FindAll() []*model.Video
+// 	FindByID(id string) *model.Video
+// }
 
-type database struct {
+//Database ...
+type Database struct {
 	client *mongo.Client
 }
 
@@ -30,49 +32,72 @@ const (
 	COLLECTION = "videos"
 )
 
-//New ...
-func New() VideoDB {
-	//mongodb+srv://USERNAME:PASSWORD@HOST:PORT
-	// MONGODB := os.Getenv("MONGODB")
-	clientOptions := options.Client().ApplyURI("mongodb+srv://root:@localhost:27017")
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	mongo.Connect(ctx, clientOptions)
-	dbClient, err := mongo.Connect(ctx, clientOptions)
+//Connect ...
+func Connect() *Database {
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Connected to MongoDB")
-	return &database{
-		client: dbClient,
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = client.Connect(ctx)
+	return &Database{
+		client: client,
 	}
 }
 
 //Save ...
-func (db *database) Save(video *model.Video) {
+func (db *Database) Save(video *model.NewVideo) *model.Video {
 	collection := db.client.Database(DATABASE).Collection(COLLECTION)
-	_, err := collection.InsertOne(context.TODO(), video)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	res, err := collection.InsertOne(ctx, video)
 	if err != nil {
 		log.Fatal(err)
+	}
+	return &model.Video{
+		ID:    res.InsertedID.(primitive.ObjectID).Hex(),
+		Title: video.Title,
+		URL:   video.URL,
 	}
 }
 
 //FindAll ...
-func (db *database) FindAll() []*model.Video {
-	var result []*model.Video
+func (db *Database) FindAll() []*model.Video {
+	var videos []*model.Video
 	collection := db.client.Database(DATABASE).Collection(COLLECTION)
-	cursor, err := collection.Find(context.TODO(), bson.D{})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
-	defer cursor.Close(context.TODO())
-	for cursor.Next(context.TODO()) {
+	for cursor.Next(ctx) {
 		var video *model.Video
 		err := cursor.Decode(&video)
 		if err != nil {
 			log.Fatal(err)
 		}
-		result = append(result, video)
+		videos = append(videos, video)
 	}
-	return result
+	return videos
+}
+
+//FindByID ...
+func (db *Database) FindByID(id string) *model.Video {
+	ObjectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	collection := db.client.Database(DATABASE).Collection(COLLECTION)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	res := collection.FindOne(ctx, bson.M{"_id": ObjectID})
+	if err != nil {
+		log.Fatal(err)
+	}
+	video := model.Video{}
+	res.Decode(video)
+	return &video
 
 }

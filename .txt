@@ -11,16 +11,17 @@ import (
 	"github.com/abuabdillatief/gqlgen-todos/graph/model"
 )
 
+var database = db.Connect()
+
+func (r *queryResolver) Video(ctx context.Context, id string) (*model.Video, error) {
+	return database.FindByID(id), nil
+}
 func (r *mutationResolver) CreateVideo(ctx context.Context, input model.NewVideo) (*model.Video, error) {
 	return database.Save(&input), nil
 }
 
 func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
 	return database.FindAll(), nil
-}
-
-func (r *queryResolver) Video(ctx context.Context, id string) (*model.Video, error) {
-	return database.FindByID(id), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -38,4 +39,3 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
-var database = db.Connect()

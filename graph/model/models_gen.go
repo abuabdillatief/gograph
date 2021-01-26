@@ -3,19 +3,12 @@
 package model
 
 type NewVideo struct {
-	Title  string `json:"title"`
-	URL    string `json:"url"`
-	UserID string `json:"userID"`
-}
-
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	Title string `json:"title"`
+	URL   string `json:"url"`
 }
 
 type Video struct {
-	ID     string `json:"id"`
-	Title  string `json:"title"`
-	URL    string `json:"url"`
-	Author *User  `json:"author"`
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	URL   string `json:"url"`
 }
