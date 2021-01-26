@@ -2,7 +2,9 @@
 schema:
   - graph/*.graphqls
   - graph/schema/types/video.graphql
+  - graph/schema/types/audio.graphql
   - graph/schema/inputs/video_input.graphql
+  - graph/schema/inputs/audio_input.graphql
   - graph/schema/query.graphql
   - graph/schema/mutation.graphql
 
@@ -23,8 +25,12 @@ model:
 
 # Where should the resolver implementations go?
 resolver:
-  filename: graph/resolvers/resolver.go
-  type: Resolver
+  layout: follow-schema
+  dir: graph/resolvers
+  package: resolvers
+# resolver:
+#   filename: graph/resolvers/resolver.go
+#   type: Resolver
 
 # Optional: turn on use `gqlgen:"fieldName"` tags in your models
 # struct_tag: json
@@ -61,3 +67,7 @@ models:
     model: github.com/abuabdillatief/gograph/graph/model.Video
   NewVideo:
     model: github.com/abuabdillatief/gograph/graph/model.NewVideo
+  Audio:
+    model: github.com/abuabdillatief/gograph/graph/model.Audio
+  NewAudio:
+    model: github.com/abuabdillatief/gograph/graph/model.NewAudio

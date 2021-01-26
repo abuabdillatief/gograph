@@ -21,10 +21,13 @@ type Database struct {
 const (
 	//DATABASE ...
 	DATABASE = "graphql"
-
-	//COLLECTION ...
-	COLLECTION = "videos"
 )
+
+//COLLECTION ...
+var COLLECTION = map[string]string{
+	"videos": "videos",
+	"audios": "audios",
+}
 
 //Connect ...
 func Connect() *Database {
@@ -42,7 +45,7 @@ func Connect() *Database {
 
 //Save ...
 func (db *Database) Save(video *model.NewVideo) *model.Video {
-	collection := db.client.Database(DATABASE).Collection(COLLECTION)
+	collection := db.client.Database(DATABASE).Collection(COLLECTION["videos"])
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	res, err := collection.InsertOne(ctx, video)
@@ -59,7 +62,7 @@ func (db *Database) Save(video *model.NewVideo) *model.Video {
 //FindAll ...
 func (db *Database) FindAll() []*model.Video {
 	var videos []*model.Video
-	collection := db.client.Database(DATABASE).Collection(COLLECTION)
+	collection := db.client.Database(DATABASE).Collection(COLLECTION["videos"])
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	cursor, err := collection.Find(ctx, bson.M{})
@@ -84,7 +87,7 @@ func (db *Database) FindByID(id string) *model.Video {
 	if err != nil {
 		log.Fatal(err)
 	}
-	collection := db.client.Database(DATABASE).Collection(COLLECTION)
+	collection := db.client.Database(DATABASE).Collection(COLLECTION["videos"])
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	res := collection.FindOne(ctx, bson.M{"_id": ObjectID})
@@ -99,7 +102,7 @@ func (db *Database) Delete(id string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	collection := db.client.Database(DATABASE).Collection(COLLECTION)
+	collection := db.client.Database(DATABASE).Collection(COLLECTION["videos"])
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	res, err := collection.DeleteOne(ctx, bson.M{"_id": ObjectID})

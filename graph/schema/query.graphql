@@ -1,4 +1,6 @@
 type Query {
   videos: [Video!]!
   video(_id: String!): Video!
+  audios: [Audio!]!
+  audio(_id: String!): Audio!
 }

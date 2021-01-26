@@ -1,0 +1,4 @@
+input NewAudio {
+  title: String!
+  url: String!
+}
