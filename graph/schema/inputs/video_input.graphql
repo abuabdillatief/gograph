@@ -1,0 +1,7 @@
+input NewVideo {
+  title: String!
+  url: String!
+}
+input DeleteVideoID {
+  id: String!
+}

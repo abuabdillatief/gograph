@@ -1,0 +1,4 @@
+type Mutation {
+  createVideo(input: NewVideo!): Video!
+  deleteVideo(input: DeleteVideoID!) String!
+}

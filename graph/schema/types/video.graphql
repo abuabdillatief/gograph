@@ -1,0 +1,5 @@
+type Video {
+  id: ID!
+  title: String!
+  url: String!
+}

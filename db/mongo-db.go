@@ -12,13 +12,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// //VideoDB ...
-// type VideoDB interface {
-// 	Save(video *model.NewVideo) *model.Video
-// 	FindAll() []*model.Video
-// 	FindByID(id string) *model.Video
-// }
-
 //Database ...
 type Database struct {
 	client *mongo.Client
