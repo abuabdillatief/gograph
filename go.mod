@@ -1,4 +1,4 @@
-module github.com/abuabdillatief/gqlgen-todos
+module github.com/abuabdillatief/gograph
 
 go 1.15
 

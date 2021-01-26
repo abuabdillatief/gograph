@@ -12,7 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/abuabdillatief/gqlgen-todos/graph/model"
+	"github.com/abuabdillatief/gograph/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -45,6 +45,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Mutation struct {
 		CreateVideo func(childComplexity int, input model.NewVideo) int
+		DeleteVideo func(childComplexity int, input string) int
 	}
 
 	Query struct {
@@ -61,6 +62,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateVideo(ctx context.Context, input model.NewVideo) (*model.Video, error)
+	DeleteVideo(ctx context.Context, input string) (string, error)
 }
 type QueryResolver interface {
 	Videos(ctx context.Context) ([]*model.Video, error)
@@ -93,6 +95,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateVideo(childComplexity, args["input"].(model.NewVideo)), true
+
+	case "Mutation.deleteVideo":
+		if e.complexity.Mutation.DeleteVideo == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteVideo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteVideo(childComplexity, args["input"].(string)), true
 
 	case "Query.video":
 		if e.complexity.Query.Video == nil {
@@ -198,24 +212,25 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `type Video {
+	{Name: "graph/schema/types/video.graphql", Input: `type Video {
   id: ID!
   title: String!
   url: String!
 }
-
-type Query {
-  videos: [Video!]!
-  video(_id: String!): Video!
-}
-
-input NewVideo {
+`, BuiltIn: false},
+	{Name: "graph/schema/inputs/video_input.graphql", Input: `input NewVideo {
   title: String!
   url: String!
 }
-
-type Mutation {
+`, BuiltIn: false},
+	{Name: "graph/schema/query.graphql", Input: `type Query {
+  videos: [Video!]!
+  video(_id: String!): Video!
+}
+`, BuiltIn: false},
+	{Name: "graph/schema/mutation.graphql", Input: `type Mutation {
   createVideo(input: NewVideo!): Video!
+  deleteVideo(input: String!): String!
 }
 `, BuiltIn: false},
 }
@@ -231,7 +246,22 @@ func (ec *executionContext) field_Mutation_createVideo_args(ctx context.Context,
 	var arg0 model.NewVideo
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewVideo2githubᚗcomᚋabuabdillatiefᚋgqlgenᚑtodosᚋgraphᚋmodelᚐNewVideo(ctx, tmp)
+		arg0, err = ec.unmarshalNNewVideo2githubᚗcomᚋabuabdillatiefᚋgographᚋgraphᚋmodelᚐNewVideo(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteVideo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -347,7 +377,49 @@ func (ec *executionContext) _Mutation_createVideo(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.Video)
 	fc.Result = res
-	return ec.marshalNVideo2ᚖgithubᚗcomᚋabuabdillatiefᚋgqlgenᚑtodosᚋgraphᚋmodelᚐVideo(ctx, field.Selections, res)
+	return ec.marshalNVideo2ᚖgithubᚗcomᚋabuabdillatiefᚋgographᚋgraphᚋmodelᚐVideo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteVideo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteVideo_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteVideo(rctx, args["input"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_videos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -382,7 +454,7 @@ func (ec *executionContext) _Query_videos(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]*model.Video)
 	fc.Result = res
-	return ec.marshalNVideo2ᚕᚖgithubᚗcomᚋabuabdillatiefᚋgqlgenᚑtodosᚋgraphᚋmodelᚐVideoᚄ(ctx, field.Selections, res)
+	return ec.marshalNVideo2ᚕᚖgithubᚗcomᚋabuabdillatiefᚋgographᚋgraphᚋmodelᚐVideoᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_video(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -424,7 +496,7 @@ func (ec *executionContext) _Query_video(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*model.Video)
 	fc.Result = res
-	return ec.marshalNVideo2ᚖgithubᚗcomᚋabuabdillatiefᚋgqlgenᚑtodosᚋgraphᚋmodelᚐVideo(ctx, field.Selections, res)
+	return ec.marshalNVideo2ᚖgithubᚗcomᚋabuabdillatiefᚋgographᚋgraphᚋmodelᚐVideo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1746,6 +1818,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "deleteVideo":
+			out.Values[i] = ec._Mutation_deleteVideo(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2127,7 +2204,7 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewVideo2githubᚗcomᚋabuabdillatiefᚋgqlgenᚑtodosᚋgraphᚋmodelᚐNewVideo(ctx context.Context, v interface{}) (model.NewVideo, error) {
+func (ec *executionContext) unmarshalNNewVideo2githubᚗcomᚋabuabdillatiefᚋgographᚋgraphᚋmodelᚐNewVideo(ctx context.Context, v interface{}) (model.NewVideo, error) {
 	res, err := ec.unmarshalInputNewVideo(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -2147,11 +2224,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNVideo2githubᚗcomᚋabuabdillatiefᚋgqlgenᚑtodosᚋgraphᚋmodelᚐVideo(ctx context.Context, sel ast.SelectionSet, v model.Video) graphql.Marshaler {
+func (ec *executionContext) marshalNVideo2githubᚗcomᚋabuabdillatiefᚋgographᚋgraphᚋmodelᚐVideo(ctx context.Context, sel ast.SelectionSet, v model.Video) graphql.Marshaler {
 	return ec._Video(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNVideo2ᚕᚖgithubᚗcomᚋabuabdillatiefᚋgqlgenᚑtodosᚋgraphᚋmodelᚐVideoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Video) graphql.Marshaler {
+func (ec *executionContext) marshalNVideo2ᚕᚖgithubᚗcomᚋabuabdillatiefᚋgographᚋgraphᚋmodelᚐVideoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Video) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2175,7 +2252,7 @@ func (ec *executionContext) marshalNVideo2ᚕᚖgithubᚗcomᚋabuabdillatiefᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNVideo2ᚖgithubᚗcomᚋabuabdillatiefᚋgqlgenᚑtodosᚋgraphᚋmodelᚐVideo(ctx, sel, v[i])
+			ret[i] = ec.marshalNVideo2ᚖgithubᚗcomᚋabuabdillatiefᚋgographᚋgraphᚋmodelᚐVideo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2188,7 +2265,7 @@ func (ec *executionContext) marshalNVideo2ᚕᚖgithubᚗcomᚋabuabdillatiefᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNVideo2ᚖgithubᚗcomᚋabuabdillatiefᚋgqlgenᚑtodosᚋgraphᚋmodelᚐVideo(ctx context.Context, sel ast.SelectionSet, v *model.Video) graphql.Marshaler {
+func (ec *executionContext) marshalNVideo2ᚖgithubᚗcomᚋabuabdillatiefᚋgographᚋgraphᚋmodelᚐVideo(ctx context.Context, sel ast.SelectionSet, v *model.Video) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")

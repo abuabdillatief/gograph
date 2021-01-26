@@ -2,10 +2,11 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
-	"github.com/abuabdillatief/gqlgen-todos/graph/model"
+	"github.com/abuabdillatief/gograph/graph/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -71,6 +72,7 @@ func (db *Database) FindAll() []*model.Video {
 		if err != nil {
 			log.Fatal(err)
 		}
+		//==================== +
 		videos = append(videos, video)
 	}
 	return videos
@@ -89,4 +91,20 @@ func (db *Database) FindByID(id string) *model.Video {
 	video := model.Video{}
 	res.Decode(&video)
 	return &video
+}
+
+//Delete ...
+func (db *Database) Delete(id string) string {
+	ObjectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	collection := db.client.Database(DATABASE).Collection(COLLECTION)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	res, err := collection.DeleteOne(ctx, bson.M{"_id": ObjectID})
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fmt.Sprintf("Deleted document: %v", res.DeletedCount)
 }
