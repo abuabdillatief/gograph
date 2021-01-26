@@ -93,11 +93,8 @@ func (db *Database) FindByID(id string) *model.Video {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	res := collection.FindOne(ctx, bson.M{"_id": ObjectID})
-	if err != nil {
-		log.Fatal(err)
-	}
 	video := model.Video{}
-	res.Decode(video)
+	res.Decode(&video)
 	return &video
 
 }
