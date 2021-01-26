@@ -96,5 +96,4 @@ func (db *Database) FindByID(id string) *model.Video {
 	video := model.Video{}
 	res.Decode(&video)
 	return &video
-
 }
