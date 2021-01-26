@@ -10,13 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
-//DB ...
-var DB *mongo.Collection
-
 //ColsType ...
 type ColsType struct {
 	Audios *mongo.Collection
 	Videos *mongo.Collection
+	Users  *mongo.Collection
 }
 
 //DBCollections ...
@@ -36,6 +34,7 @@ func ConnectMongo() {
 
 	DBCollections.Audios = client.Database("graphql").Collection("audios")
 	DBCollections.Videos = client.Database("graphql").Collection("videos")
+	DBCollections.Users = client.Database("graphql").Collection("users")
 
 	_, err = DBCollections.Audios.Indexes().CreateOne(
 		context.Background(),

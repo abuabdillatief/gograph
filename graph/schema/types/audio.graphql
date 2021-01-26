@@ -2,4 +2,5 @@ type Audio {
   id: ID!
   title: String!
   url: String!
+  author: User!
 }

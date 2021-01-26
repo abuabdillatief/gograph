@@ -1,4 +1,5 @@
 input NewVideo {
   title: String!
   url: String!
+  userID: String!
 }

@@ -3,6 +3,7 @@ schema:
   - graph/*.graphqls
   - graph/schema/types/video.graphql
   - graph/schema/types/audio.graphql
+  - graph/schema/types/user.graphql
   - graph/schema/inputs/video_input.graphql
   - graph/schema/inputs/audio_input.graphql
   - graph/schema/query.graphql
@@ -71,3 +72,5 @@ models:
     model: github.com/abuabdillatief/gograph/graph/model.Audio
   NewAudio:
     model: github.com/abuabdillatief/gograph/graph/model.NewAudio
+  User:
+    model: github.com/abuabdillatief/gograph/graph/model.User

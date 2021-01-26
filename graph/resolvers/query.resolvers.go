@@ -32,7 +32,6 @@ func (r *queryResolver) Videos(ctx context.Context) ([]*model.Video, error) {
 		videos = append(videos, video)
 	}
 	return videos, nil
-
 }
 
 func (r *queryResolver) Video(ctx context.Context, id string) (*model.Video, error) {
@@ -45,7 +44,6 @@ func (r *queryResolver) Video(ctx context.Context, id string) (*model.Video, err
 	res := database.Videos.FindOne(ctx, bson.M{"_id": ObjectID})
 	res.Decode(video)
 	return video, nil
-
 }
 
 func (r *queryResolver) Audios(ctx context.Context) ([]*model.Audio, error) {
@@ -65,7 +63,6 @@ func (r *queryResolver) Audios(ctx context.Context) ([]*model.Audio, error) {
 		audios = append(audios, audio)
 	}
 	return audios, nil
-
 }
 
 func (r *queryResolver) Audio(ctx context.Context, id string) (*model.Audio, error) {
@@ -78,6 +75,16 @@ func (r *queryResolver) Audio(ctx context.Context, id string) (*model.Audio, err
 	var audio *model.Audio
 	res.Decode(&audio)
 	return audio, nil
+}
+
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	log.Println("Get USERS!")
+	return nil, nil
+}
+
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	log.Println("Get ONE USER!")
+	return nil, nil
 }
 
 // Query returns generated.QueryResolver implementation.

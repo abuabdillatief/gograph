@@ -1,6 +1,6 @@
 type Mutation {
-  createVideo(input: NewVideo!): Video!
-  deleteVideo(input: String!): String!
-  createAudio(input: NewAudio!): Audio!
-  deleteAudio(input: String!): String!
+  createVideo(newVideo: NewVideo!): Video!
+  deleteVideo(id: String!): String!
+  createAudio(newAudio: NewAudio!): Audio!
+  deleteAudio(id: String!): String!
 }
