@@ -7,12 +7,16 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/abuabdillatief/gograph/common"
 	"github.com/abuabdillatief/gograph/graph/generated"
 	graph "github.com/abuabdillatief/gograph/graph/resolvers"
 )
 
 const defaultPort = "8080"
 
+func init() {
+	common.ConnectMongo()
+}
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
